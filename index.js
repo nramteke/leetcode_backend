@@ -1,6 +1,8 @@
 const express = require('express')
 const bodyParser = require('body-parser');
 const { use } = require('express/lib/application');
+const crypto = require('crypto');
+
 const app = express()
 const port = 3000
 
@@ -46,7 +48,7 @@ app.post('/signup', (req,res) => {
         
     }
     else{
-        res.status(401);
+        res.status(400);
         res.send(`Your signup with ${email} failed..`);
     }
     console.log("Users " + JSON.stringify(users));
@@ -55,9 +57,23 @@ app.post('/signup', (req,res) => {
 app.post('/login', (req,res) => {
     //Add logic to decode the body
     //Body should have email and password
-
-    //
-    res.send(`<html><h1 style="color:green;">Hello World</h1></html>`);
+    let {email,password,role} = req.body;
+    if(email && password && role)
+    {
+        let user = users.find(user => user.email === email);
+        if(user && user.password === password){
+            //login Success
+            const token = crypto.randomBytes(10).toString('hex');
+            res.send({message: 'Login successful.', token});
+        }
+        else{
+            res.send({message: 'Login failed. Enter correct details.'});
+        }
+    }
+    else{
+        res.status(400);
+        res.send({message: 'Login failed.'});
+    }
 });
 
 app.get('/questions', (req,res) => {
